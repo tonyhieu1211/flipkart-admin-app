@@ -1,4 +1,10 @@
-export const api = 'http://localhost:2000/api';
+
+const baseUrl = 
+    location.hostname === "localhost" 
+    ? "http://localhost:2000"
+    : "https://flipkart-backend-1.herokuapp.com/"
+
+export const api = `${baseUrl}/api`;
 export const generatePicture = (picName) => {
-    return `http://localhost:2000/public/${picName}`
+    return `${baseUrl}/${picName}`
 }
