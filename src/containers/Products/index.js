@@ -1,11 +1,10 @@
-import React, { useState } from 'react'
+import React, {  useState } from 'react'
 import { Col, Container, Row, Modal, Button, Table } from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux';
 import { addProduct, deleteProductById } from '../../actions';
 import Layout from '../../components/Layout';
 import Input from '../../components/UI/input';
 import MyModal from '../../components/UI/Modal';
-import { generatePicture } from '../../urlConfig';
 import './style.css';
 
 const Product = () => {
@@ -41,21 +40,20 @@ const Product = () => {
         return options;
     }    
     
+    const previewFile = (file,key) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = () => {
+            setProductPics([...productPics,reader.result]);
+        };
+    };  
 
-
-    const submitProduct = () => {
-        const form = new FormData();
-        form.append('name', name);
-        form.append('price', price);
-        form.append('quantity', quantity);
-        form.append('description', description);
-        form.append('category', category);
-        for( let pic of productPics){
-            
-            form.append('productPic', pic);
+    const submitProduct = async () => {
+        const form = {
+            name,price,quantity,description,category,productPics
         }
-        dispatch(addProduct(form));
 
+        dispatch(addProduct(form));
         setShowAddProductModal(false);
     }
     
@@ -90,7 +88,11 @@ const Product = () => {
                             <td>{product.name}</td>
                             <td>{product.price}</td>
                             <td>{product.quantity}</td>
-                            <td>{getCategoryName(createCategoryList(categoryReducer.categories), product.category)}</td>
+                            <td>{
+                                product.category.name == undefined ?
+                                getCategoryName(createCategoryList(categoryReducer.categories), product.category)
+                                : product.category.name
+                            }</td>
                             <td>
                                 <button onClick={() => showProductDetails(product)} >
                                     info
@@ -153,9 +155,15 @@ const Product = () => {
                     )
                     }
                 </select>
-                {productPics.length > 0 ? productPics.map((pic, index) =>
-                    <div key={index}>{pic.name}</div>) : null}
-                <input type="file" name="productPic" onChange={e => { setProductPics([...productPics, e.target.files[0]]); }} />
+                <input type="file" name="productPic" onChange={e => { 
+                   // setProductPics([...productPics, e.target.files[0]]); 
+                    previewFile(e.target.files[0]);
+                    }} />
+                <div style={{display:'flex'}}>
+                    {productPics.length > 0 && productPics.map((src, index) =>
+                        <img src={src} alt="" style={{ width: "25%", height: "100%",marginRight:'10px' }} />
+                    )}
+                </div>
             </MyModal>
         );
     }
@@ -212,7 +220,7 @@ const Product = () => {
                         <div style={{ display:'flex' }}>
                             {productDetails.productPics.map(pic => 
                                 <div className="productPictureContainer" >
-                                    <img src={generatePicture(pic.img)} />
+                                    <img src={pic.img} />
                                 </div>
                                 )}
                         </div>

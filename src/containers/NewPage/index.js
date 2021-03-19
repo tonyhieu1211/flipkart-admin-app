@@ -53,31 +53,34 @@ const NewPage = (props) => {
         setType(category.type);
     } 
 
+
+
+    const previewImage = (file,name) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = () => {
+            if(name == 'product'){
+                setProducts([...products, reader.result]);    
+            }
+            if(name == 'banner'){
+                setBanners([...banners,reader.result]);
+            }
+        };
+    };
+
     const submitPageForm = () => {
-        const pageForm = new FormData();
-
-        if(title === ""){
-            alert('title is required');
-            setCreatePage(false);
-            return;
+        console.log(banners);
+        console.log(products);
+        const pageForm = {
+            title,
+            description:desc,
+            category:categoryId,
+            type,
+            banners,
+            products
         }
-
-        pageForm.append('title',title);
-        pageForm.append('description',desc);
-        pageForm.append('category', categoryId);
-        pageForm.append('type', type);
-
-        banners.forEach((banner, index) => {
-            pageForm.append('banners', banner);
-        });
-
-        products.forEach((product, index) => {
-            pageForm.append('products', product);
-        });
         dispatch(createPageAction(pageForm));
-        setCreatePage(false);
-    }
-
+    }    
     const renderCreatePageModal = () => {
         return (
             <MyModal
@@ -131,38 +134,41 @@ const NewPage = (props) => {
                             />
                         </Col>
                     </Row>
-                    {
-                        banners.length > 0 ? banners.map((banner,index) => 
-                        <Row key={index}>
-                            <Col  >{banner.name}</Col>
-                        </Row>    
-                            ) : null
-                    }
                     <Row>
                         <Col>
+                            <label>Banners</label>
                             <Input 
                                 type="file"
                                 name="banners"
-                                onChange={handleBannerImg}
+                                onChange={(e) => previewImage(e.target.files[0],'banner')}
                             />
                         </Col>
                     </Row>
-                    {
-                        products.length > 0 ? products.map((product,index) => 
-                        <Row key={index}>
-                            <Col >{product.name}</Col>
-                        </Row>    
-                            ) : null
-                    }
+                    <div style={{display:'flex'}}>
+                    {banners.length > 0 && banners.map((src, index) =>
+                       
+                            <img key={index} src={src} alt="" style={{ width: "25%", height: "100%",marginRight:'10px' }} />
+                        
+                        
+                    )}
+                    </div>
                     <Row>
                         <Col>
+                            <label>Products</label>
                             <Input 
                                 type="file"
                                 name="products"
-                                onChange={handleProductImg}
+                                onChange={(e) => previewImage(e.target.files[0],'product')}
                             />
                         </Col>
                     </Row>
+                    <div style={{display:'flex'}}>
+                    {products.length > 0 && products.map((src, index) =>
+                        
+                            <img key={index} src={src} alt="" style={{ width: "25%", height: "100%",marginRight:'10px' }} />
+                        
+                    )}
+                    </div>
                 </Container>
 
 
