@@ -68,6 +68,7 @@ const Product = () => {
             setDescription('');
             setCategory('');
             setProductPics([]);
+            setPreviewImages([]);
             setShowAddProductModal(false);
         })
     }
