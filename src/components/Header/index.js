@@ -18,6 +18,9 @@ function Header(props) {
         return (
             <Nav>
                 <li className="nav-item">
+                    <span  className="nav-link" >{auth.user.fullName || auth.user.username}</span>
+                </li>
+                <li className="nav-item">
                     <span  className="nav-link" onClick={ logout }>Sign out</span>
                 </li>
             </Nav>

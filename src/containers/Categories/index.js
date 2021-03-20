@@ -30,7 +30,7 @@ const Category = () => {
     
     const dispatch = useDispatch();
 
-    const categoryList = categoryReducer.categories;
+    
     
     useEffect(()=>{
         if(!categoryReducer.loading) setShow(false);
@@ -84,6 +84,7 @@ const Category = () => {
         return options;
     }
 
+    const categoryList = createCategoryList(categoryReducer.categories);
     const updateCheckedAndExpandedArray = () => {
         const categories = createCategoryList(categoryReducer.categories);
         const checkedArray = [];
@@ -163,6 +164,7 @@ const Category = () => {
 
     return (
         <Layout sidebar>
+            
             <Container>
                 <Row>
                     <Col md={12}>

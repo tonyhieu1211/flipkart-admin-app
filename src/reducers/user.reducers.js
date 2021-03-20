@@ -1,7 +1,6 @@
 import { userConstants } from "../actions/constants";
 
 const initState = {
-    message: '',
     error: null,
     loading: false
 }
@@ -18,7 +17,6 @@ export default (state = initState, action) => {
             state = {
                 ...state,
                 loading: false,
-                message: action.payload.message
             }
             break;
         case userConstants.USER_REG_FAILURE:

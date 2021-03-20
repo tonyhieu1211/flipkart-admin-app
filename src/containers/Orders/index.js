@@ -54,7 +54,7 @@ const Order = (props) => {
               <div className="title">Items</div>
               {orderItem.items.map((item, index) => (
                 <div className="value" key={index}>
-                  {item.productId.name}
+                  {item.productId ? item.productId.name : ''}
                 </div>
               ))}
             </div>

@@ -32,7 +32,7 @@ const UpdateCategoriesModal = (props) => {
 
                     <Col>
                         <Input
-                            value={item.name}
+                            value={item.name != undefined ? item.name : ''}
                             placeholder={`Category name`}
                             onChange={(e) => handleCategoryInput('name', e.target.value, index, 'expanded')}
                         />

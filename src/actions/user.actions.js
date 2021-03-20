@@ -1,7 +1,7 @@
 import axios from "../helpers/axios";
-import { userConstants } from "./constants";
+import { authConstants, userConstants } from "./constants";
 
-export const signup = (user) => {
+export const signup = (user) => { 
     console.log(user);
     return async (dispatch) => {
         dispatch({ type: userConstants.USER_REG_REQUEST });
@@ -10,13 +10,22 @@ export const signup = (user) => {
         });
 
         if(res.status === 201){
-            const { message } = res.data;
+            
             dispatch({
                 type: userConstants.USER_REG_SUCCESS,
+            });
+            const {token, user} = res.data;
+            alert('Sign up successfully');
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+            dispatch({
+                type: authConstants.LOGIN_SUCCESS,
                 payload:{
-                    message
+                    token,
+                    user
                 }
             });
+            
             
         } else if(res.status === 400){
             dispatch({

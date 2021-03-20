@@ -24,6 +24,7 @@ const AddCategoryModal = (props) => {
             modalTitle={modalTitle}
             onSubmit={onSubmit}
         >
+
             <Row>
                 <Col>
                     <Input
