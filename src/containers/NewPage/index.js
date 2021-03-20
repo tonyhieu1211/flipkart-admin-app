@@ -62,6 +62,7 @@ const NewPage = (props) => {
     } 
 
     const submitPageForm = () => {
+        
         let bannerImgPromises = [];
 
         banners.forEach((banner, index) => {
@@ -106,6 +107,18 @@ const NewPage = (props) => {
                                 options={categories}
 
                             />
+                            {/* <select
+                                value={categoryId}
+                                onChange={handleCategoryChange}
+                                className="form-control form-control-sm"
+                            >
+                                <option value="">Select Category</option>
+                                {
+                                    categories.map((category,index) =>
+                                        <option key={category._id} value={category._id}>{category.name}</option>
+                                    )
+                                }
+                            </select> */}
                         </Col>
                     </Row>
                     <Row>
@@ -144,6 +157,21 @@ const NewPage = (props) => {
                             <img src={src} alt="" style={{ width: "25%", height: "100%", marginRight: '10px' }} />
                         )}
                     </div>
+                    {/* <label>Products</label>
+                    <Row>
+                        <Col>
+                            <Input 
+                                type="file"
+                                name="products"
+                                onChange={handleProductImg}
+                            />
+                        </Col>
+                    </Row>
+                    <div style={{ display: 'flex' }}>
+                        {previewProducts.length > 0 && previewProducts.map((src, index) =>
+                            <img src={src} alt="" style={{ width: "25%", height: "100%", marginRight: '10px' }} />
+                        )}
+                    </div> */}
                 </Container>
 
 
