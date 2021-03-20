@@ -5,7 +5,7 @@ import { addProduct, deleteProductById } from '../../actions';
 import Layout from '../../components/Layout';
 import Input from '../../components/UI/input';
 import MyModal from '../../components/UI/Modal';
-import { generatePicture } from '../../urlConfig';
+import uploadImages from '../../helpers/uploadImages';
 import './style.css';
 
 const Product = () => {
@@ -17,9 +17,8 @@ const Product = () => {
     const [productPics, setProductPics] = useState([]);
     const [productDetailsModal,setProductDetailsModal] = useState(false);
     const [productDetails, setProductDetails] = useState(null);
-    const [ showAddProductModal, setShowAddProductModal ] = useState(false);
-
-    
+    const [showAddProductModal, setShowAddProductModal ] = useState(false);
+    const [previewImages,setPreviewImages] = useState([]);
 
     const productReducer = useSelector(state => state.product);
 
@@ -29,6 +28,13 @@ const Product = () => {
     const categoryReducer = useSelector(state => state.category);
 
 
+    const previewFile = (file) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = () => {
+            setPreviewImages([...previewImages,reader.result]);
+        };
+    };  
 
     const createCategoryList = (categories, options = []) => {
         for(let category of categories){
@@ -40,23 +46,23 @@ const Product = () => {
 
         return options;
     }    
-    
-
 
     const submitProduct = () => {
-        const form = new FormData();
-        form.append('name', name);
-        form.append('price', price);
-        form.append('quantity', quantity);
-        form.append('description', description);
-        form.append('category', category);
-        for( let pic of productPics){
+        
+        let promiseArray = [];
+        productPics.map(img => {
+            promiseArray.push(uploadImages(img));
+        });
+        
+        Promise.all(promiseArray).then((results)=>{
+            const imgUrls = results.map(res => ({img:res.url}));
             
-            form.append('productPic', pic);
-        }
-        dispatch(addProduct(form));
-
-        setShowAddProductModal(false);
+            const data = {
+                name,price,quantity,description,category,imgUrls,
+            }
+            dispatch(addProduct(data));
+            setShowAddProductModal(false);
+        })
     }
     
 
@@ -84,13 +90,17 @@ const Product = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {productReducer.products.map((product) =>
+                    {productReducer.products.map((product,index) =>
                         <tr  key={product._id}>
-                            <td>1</td>
+                            <td>{index}</td>
                             <td>{product.name}</td>
                             <td>{product.price}</td>
                             <td>{product.quantity}</td>
-                            <td>{getCategoryName(createCategoryList(categoryReducer.categories), product.category)}</td>
+                            <td>{
+                            product.category.name ? 
+                                product.category.name :
+                                getCategoryName(createCategoryList(categoryReducer.categories), product.category)
+                            }</td>
                             <td>
                                 <button onClick={() => showProductDetails(product)} >
                                     info
@@ -153,9 +163,16 @@ const Product = () => {
                     )
                     }
                 </select>
-                {productPics.length > 0 ? productPics.map((pic, index) =>
-                    <div key={index}>{pic.name}</div>) : null}
-                <input type="file" name="productPic" onChange={e => { setProductPics([...productPics, e.target.files[0]]); }} />
+                <input type="file" name="productPic" onChange={e => { 
+                    setProductPics([...productPics, e.target.files[0]]); 
+                    
+                    previewFile(e.target.files[0]);
+                    }} />
+                <div style={{display:'flex'}}>
+                    {previewImages.length > 0 && previewImages.map((src, index) =>
+                        <img src={src} alt="" style={{ width: "25%", height: "100%",marginRight:'10px' }} />
+                    )}
+                </div>
             </MyModal>
         );
     }
@@ -196,7 +213,11 @@ const Product = () => {
                     <Col md="6">
                         <label className="key">Category</label>
                         <p className="value">
-                            {getCategoryName(createCategoryList(categoryReducer.categories), productDetails.category)}
+                            {
+                                productDetails.category ? 
+                                productDetails.category.name : 
+                                getCategoryName(createCategoryList(categoryReducer.categories), productDetails.category)
+                            }
                         </p>
                     </Col>
                 </Row>
@@ -212,7 +233,7 @@ const Product = () => {
                         <div style={{ display:'flex' }}>
                             {productDetails.productPics.map(pic => 
                                 <div className="productPictureContainer" >
-                                    <img src={generatePicture(pic.img)} />
+                                    <img src={pic.img} />
                                 </div>
                                 )}
                         </div>

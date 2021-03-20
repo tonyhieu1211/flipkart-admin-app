@@ -28,11 +28,11 @@ export const getProducts = () => {
     }
 }
 
-export const addProduct = (form) => {
+export const addProduct = (data) => {
     return async dispatch => {
         try {
             dispatch({ type: productConstants.ADD_PRODUCT_REQUEST})
-            const res = await axiosInstance.post(`/product/create`, form);
+            const res = await axiosInstance.post(`/product/create`, data);
             if(res.status == 201){
                 dispatch({type: productConstants.ADD_PRODUCT_SUCCESS});
                 dispatch(getProducts());

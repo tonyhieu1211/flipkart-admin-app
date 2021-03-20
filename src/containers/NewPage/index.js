@@ -6,16 +6,18 @@ import Input from '../../components/UI/input';
 import MyModal from '../../components/UI/Modal'
 import linearCategoryList from '../../helpers/linearCategoryList';
 import {createPageAction} from '../../actions';
+import uploadImages from '../../helpers/uploadImages';
 
 const NewPage = (props) => {
     const [createPage, setCreatePage] = useState(false);
     const [title, setTitle] = useState('');
     const [categories, setCategories] = useState([]);
+    const [category,setCategory] = useState('');
     const [categoryId, setCategoryId] = useState('');
     const [desc, setDesc] = useState('');
     const [banners, setBanners] = useState([]);
-    const [products, setProducts] = useState([]);
     const [type, setType] = useState('');
+    const [previewBanners, setPreviewBanners] = useState([]);
 
     const pageReducer = useSelector(state => state.page);
     const categoryReducer = useSelector(state => state.category);
@@ -26,56 +28,63 @@ const NewPage = (props) => {
     },[categoryReducer])
 
     useEffect(()=>{
-        console.log(pageReducer);
         if(!pageReducer.loading){
-            console.log('page is false....');
             setCreatePage(false);
             setTitle('');
             setDesc('');
             setCategoryId('');
-            setProducts([]);
             setBanners([]);
         }
     },[pageReducer]);
 
+    const previewFile = (file) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = () => {
+            setPreviewBanners([...previewBanners,reader.result]);
+        };
+    }; 
+
     const handleBannerImg = (e) => {
         setBanners([...banners, e.target.files[0]]);
+        previewFile(e.target.files[0]);
     }
 
-    const handleProductImg = (e) => {
-        setProducts([...products, e.target.files[0]]);
-    }
+
 
     const handleCategoryChange = (e) => {
-        const category = categories.find(cate => cate._id == e.target.value);
-
-        setCategoryId(e.target.value);
-        setType(category.type);
+        console.log(e.target.value);
+        const foundCategory = categories.find(cate => cate.name == e.target.value);
+        setCategory(foundCategory.name);
+        setCategoryId(foundCategory._id);
+        
+        setType(foundCategory.type ? foundCategory.type : 'store');
     } 
 
     const submitPageForm = () => {
-        const pageForm = new FormData();
-
-        if(title === ""){
-            alert('title is required');
-            setCreatePage(false);
-            return;
-        }
-
-        pageForm.append('title',title);
-        pageForm.append('description',desc);
-        pageForm.append('category', categoryId);
-        pageForm.append('type', type);
+        let bannerImgPromises = [];
 
         banners.forEach((banner, index) => {
-            pageForm.append('banners', banner);
+            bannerImgPromises.push(uploadImages(banner));
         });
 
-        products.forEach((product, index) => {
-            pageForm.append('products', product);
+        Promise.all(bannerImgPromises).then((results) => {
+            const bannerUrls = results.map(res => ({
+                img:res.url,
+                navigateTo:`/bannerClicked?categoryId=${categoryId}&type=${type}`
+            }));
+            const data = {
+                title,
+                description:desc,
+                category:categoryId,
+                type,
+                banners:bannerUrls
+            }
+            
+            dispatch(createPageAction(data));
+            setCreatePage(false);
         });
-        dispatch(createPageAction(pageForm));
-        setCreatePage(false);
+
     }
 
     const renderCreatePageModal = () => {
@@ -91,24 +100,12 @@ const NewPage = (props) => {
                         <Col>
                             <Input
                                 type="select"
-                                value={categoryId}
+                                value={category}
                                 onChange={handleCategoryChange}
                                 placeholder={'Select Category'}
                                 options={categories}
 
                             />
-                            {/* <select
-                                value={categoryId}
-                                onChange={handleCategoryChange}
-                                className="form-control form-control-sm"
-                            >
-                                <option value="">Select Category</option>
-                                {
-                                    categories.map((category,index) =>
-                                        <option key={category._id} value={category._id}>{category.name}</option>
-                                    )
-                                }
-                            </select> */}
                         </Col>
                     </Row>
                     <Row>
@@ -131,14 +128,9 @@ const NewPage = (props) => {
                             />
                         </Col>
                     </Row>
-                    {
-                        banners.length > 0 ? banners.map((banner,index) => 
-                        <Row key={index}>
-                            <Col  >{banner.name}</Col>
-                        </Row>    
-                            ) : null
-                    }
+                    <label>Banners</label>
                     <Row>
+                        
                         <Col>
                             <Input 
                                 type="file"
@@ -147,22 +139,11 @@ const NewPage = (props) => {
                             />
                         </Col>
                     </Row>
-                    {
-                        products.length > 0 ? products.map((product,index) => 
-                        <Row key={index}>
-                            <Col >{product.name}</Col>
-                        </Row>    
-                            ) : null
-                    }
-                    <Row>
-                        <Col>
-                            <Input 
-                                type="file"
-                                name="products"
-                                onChange={handleProductImg}
-                            />
-                        </Col>
-                    </Row>
+                    <div style={{ display: 'flex' }}>
+                        {previewBanners.length > 0 && previewBanners.map((src, index) =>
+                            <img src={src} alt="" style={{ width: "25%", height: "100%", marginRight: '10px' }} />
+                        )}
+                    </div>
                 </Container>
 
 
