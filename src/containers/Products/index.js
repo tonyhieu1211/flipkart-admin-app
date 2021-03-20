@@ -61,6 +61,13 @@ const Product = () => {
                 name,price,quantity,description,category,imgUrls,
             }
             dispatch(addProduct(data));
+            
+            setName('');
+            setPrice('');
+            setQuantity('');
+            setDescription('');
+            setCategory('');
+            setProductPics([]);
             setShowAddProductModal(false);
         })
     }
