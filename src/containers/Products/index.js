@@ -222,7 +222,7 @@ const Product = () => {
                         <label className="key">Category</label>
                         <p className="value">
                             {
-                                productDetails.category ? 
+                                productDetails.category.name ? 
                                 productDetails.category.name : 
                                 getCategoryName(createCategoryList(categoryReducer.categories), productDetails.category)
                             }
